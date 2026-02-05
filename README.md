@@ -8,8 +8,6 @@
   <video src="https://github.com/user-attachments/assets/9381c0e2-e293-47cb-b789-031639b53472" width="100%" controls></video>
 </div>
 
-Aplikasi **Manajemen Produk** yang dibangun menggunakan **Django** & **React-style Vanilla JS** untuk memenuhi tantangan programmer di Fast Print Indonesia. Dashboard ini dirancang dengan estetika premium, performa tinggi (PostgreSQL), dan fitur manipulasi data yang lengkap.
-
 ---
 
 ## 🚀 Fitur Unggulan
@@ -25,14 +23,14 @@ Aplikasi **Manajemen Produk** yang dibangun menggunakan **Django** & **React-sty
 
 ## 🛠️ Teknologi yang Digunakan
 
-| Komponen          | Teknologi             | Keterangan                                |
-| :---------------- | :-------------------- | :---------------------------------------- |
-| **Framework**     | Django 5.2            | High-level Python Web Framework           |
-| **API Layer**     | Django REST Framework | Untuk handling data JSON & CSRF           |
-| **Database**      | PostgreSQL            | Database relasional robust (fastprint_db) |
-| **Styling**       | Tailwind CSS          | Utility-first CSS untuk desain modern     |
-| **Interactivity** | Vanilla JavaScript    | Performa maksimal tanpa framework berat   |
-| **Table Engine**  | DataTables            | Fitur search & pagination instan          |
+| Komponen          | Teknologi             | Keterangan                              |
+| :---------------- | :-------------------- | :-------------------------------------- |
+| **Framework**     | Django 5.2            | Python Web Framework                    |
+| **API Layer**     | Django REST Framework | Untuk handling data JSON & CSRF         |
+| **Database**      | PostgreSQL            | Database relasional (fastprint_db)      |
+| **Styling**       | Tailwind CSS          | Utility-first CSS untuk desain modern   |
+| **Interactivity** | Vanilla JavaScript    | Performa maksimal tanpa framework berat |
+| **Table Engine**  | DataTables            | Fitur search & pagination instan        |
 
 ---
 
