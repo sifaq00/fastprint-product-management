@@ -62,8 +62,8 @@ Buka terminal/command prompt, lalu jalankan:
 
 ```bash
 # Clone repository
-git clone <repository-url>
-cd fast-print-indonesia
+git clone https://github.com/sifaq00/fastprint-product-management.git
+cd fastprint-product-management
 
 # (Opsional) Buat virtual environment
 python -m venv venv
