@@ -1,6 +1,8 @@
+
 # 🖨️ Fast Print - Product Management Dashboard
 
 ![Banner](file:///C:/Users/sifaq/.gemini/antigravity/brain/9ebf804b-9f1c-4429-9562-ad3339e4c17b/media__1770302815252.png)
+![Tutorial](https://github.com/user-attachments/assets/9381c0e2-e293-47cb-b789-031639b53472)
 
 Aplikasi **Manajemen Produk** yang dibangun menggunakan **Django** & **React-style Vanilla JS** untuk memenuhi tantangan programmer di Fast Print Indonesia. Dashboard ini dirancang dengan estetika premium, performa tinggi (PostgreSQL), dan fitur manipulasi data yang lengkap.
 
