@@ -13,7 +13,7 @@ Aplikasi **Manajemen Produk** yang dibangun menggunakan **Django** & **React-sty
 - **Full CRUD**: Tambah, Edit, dan Hapus produk dengan validasi server-side (Serializer) & client-side.
 - **Dynamic API Fetch**: Script cerdas penarik data API dengan dukungan input **Username Manual** jika kredensial server berubah.
 - **Dashboard Statistik**: Ringkasan jumlah produk, kategori, dan status secara real-time.
-- **Modern UI**: Menggunakan **Tailwind CSS**, **DataTables**, dan **Lucide Icons** dengan tema warna resmi Fast Print (Brand Yellow).
+- **Modern UI**: Menggunakan **Tailwind CSS**, **DataTables**, dan **Lucide Icons**.
 
 ---
 
@@ -30,51 +30,83 @@ Aplikasi **Manajemen Produk** yang dibangun menggunakan **Django** & **React-sty
 
 ---
 
-## 📦 Persiapan & Instalasi
+## 📦 Panduan Instalasi & Konfigurasi
+
+Ikuti langkah-langkah di bawah ini untuk menjalankan aplikasi di lingkungan lokal Anda:
 
 ### 1. Persyaratan Sistem
 
-Pastikan Anda sudah menginstal:
+Pastikan perangkat Anda sudah terinstal:
 
-- Python 3.10+
-- PostgreSQL
-- pip
+- **Python 3.10** atau lebih baru.
+- **PostgreSQL** (sudah berjalan).
+- **pip** (Python package manager).
 
-### 2. Kloning & Install Dependencies
+### 2. Persiapan Database
+
+Buat database baru di PostgreSQL:
+
+```sql
+CREATE DATABASE fastprint_db;
+```
+
+### 3. Kloning & Install Dependencies
+
+Buka terminal/command prompt, lalu jalankan:
 
 ```bash
+# Clone repository
 git clone <repository-url>
 cd fast-print-indonesia
+
+# (Opsional) Buat virtual environment
+python -m venv venv
+source venv/bin/scripts/activate  # Windows: venv\Scripts\activate
+
+# Install requirements
 pip install -r requirements.txt
 ```
 
-### 3. Konfigurasi Environment (.env)
+### 4. Konfigurasi Environment (.env)
 
-Buat file baru bernama `.env` di root project (atau copy dari `.env.example`) dan isi dengan kredensial Anda:
+Aplikasi menggunakan file `.env` untuk menyimpan data sensitif. Salin file contoh yang disediakan:
 
 ```bash
 cp .env.example .env
 ```
 
-Isi dasar `.env`:
+Buka file `.env` dan sesuaikan nilainya:
 
-```text
-DEBUG=True
-SECRET_KEY=isi_dengan_key_anda
+- `SECRET_KEY`: Bisa diisi bebas untuk keperluan lokal (sudah ada contoh di `.env.example`).
+- `DB_PASSWORD`: Masukkan password PostgreSQL Anda.
+- Sesuaikan `DB_USER` jika bukan `postgres`.
 
-DB_NAME=fastprint_db
-DB_USER=postgres
-DB_PASSWORD=password_anda
-DB_HOST=localhost
-DB_PORT=5432
-```
+### 5. Setup Database & Migrasi
 
-### 4. Migrasi & Jalankan Server
+Jalankan migrasi untuk membuat struktur tabel di database:
 
 ```bash
 python manage.py migrate
+```
+
+### 6. Menarik Data Awal dari API
+
+Aplikasi membutuhkan data awal dari API Fast Print. Jalankan perintah berikut:
+
+```bash
+# Menjalankan fetch data (otomatis generate username & password)
+python manage.py fetch_products
+```
+
+> **Catatan**: Jika muncul error kredensial, lihat bagian [Menarik Data dari API](#-menarik-data-dari-api) di bawah untuk input username manual.
+
+### 7. Menjalankan Server
+
+```bash
 python manage.py runserver
 ```
+
+Akses dashboard di: **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)**
 
 ---
 
@@ -115,5 +147,3 @@ python manage.py fetch_products --username tesprogrammer050226C21
 Sesuai petunjuk **"HINT: CEK RESPONSE, HEADER, COOKIES"**, aplikasi ini telah diuji untuk menangani response server dengan baik, mendukung CSRF Token (Header) untuk keamanan POST/DELETE, dan mematuhi struktur data yang diminta oleh Fast Print.
 
 ---
-
-**Dibuat dengan ❤️ untuk Fast Print Indonesia.**
