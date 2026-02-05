@@ -45,7 +45,7 @@ class Command(BaseCommand):
         else:
             # Username: tesprogrammer + DDMMYY + C21/C22
             # Note: Username on portal might change suffix periodically (e.g. C21, C22)
-            username = f"tesprogrammer{day}{month}{year}C22"
+            username = f"tesprogrammer{day}{month}{year}C21"
             self.stdout.write(f"Using generated username: {username}")
         
         # Password: MD5 of bisacoding-DD-MM-YY
