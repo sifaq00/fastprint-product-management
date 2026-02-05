@@ -9,6 +9,7 @@
   <video src="https://github.com/user-attachments/assets/9381c0e2-e293-47cb-b789-031639b53472" width="100%" controls></video>
 </div>
 
+
 Aplikasi **Manajemen Produk** yang dibangun menggunakan **Django** & **React-style Vanilla JS** untuk memenuhi tantangan programmer di Fast Print Indonesia. Dashboard ini dirancang dengan estetika premium, performa tinggi (PostgreSQL), dan fitur manipulasi data yang lengkap.
 
 ---
