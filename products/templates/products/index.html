@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fast Print - Manajemen Produk</title>
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                red: '#E30613',
+                blue: '#00569C',
+                dark: '#00428A',
+                yellow: '#FFD500',
+              },
+              primary: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                200: '#bae6fd',
+                300: '#7dd3fc',
+                400: '#38bdf8',
+                500: '#00569C', /* Brand Blue */
+                600: '#00428A',
+                700: '#0369a1',
+                800: '#075985',
+                900: '#0c4a6e',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Custom DataTables Styling with Tailwind-like appearance */
+      .dataTables_wrapper {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      
+      .dataTables_wrapper .dataTables_length select,
+      .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+      }
+      
+      .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: #00569C;
+        box-shadow: 0 0 0 3px rgba(0, 86, 156, 0.1);
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        margin: 0 0.125rem;
+        border: 1px solid #e5e7eb !important;
+        background: white !important;
+        color: #374151 !important;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #f3f4f6 !important;
+        border-color: #d1d5db !important;
+        color: #111827 !important;
+      }
+      
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #FFD500 !important;
+        border-color: #FFD500 !important;
+        color: #000000 !important;
+      }
+      
+      table.dataTable thead th {
+        border-bottom: 2px solid #e5e7eb;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        padding: 1rem 0.75rem;
+      }
+      
+      table.dataTable tbody td {
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      
+      table.dataTable tbody tr:hover {
+        background-color: #f8fafc;
+      }
+      
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      
+      /* Brand Color Utilities */
+      .brand-yellow-bg {
+        background-color: #FFD500;
+        color: #000000;
+      }
+      
+      .brand-blue-bg {
+        background-color: #00569C;
+        color: #FFFFFF;
+      }
+      
+      .brand-red-bg {
+        background-color: #E30613;
+        color: #FFFFFF;
+      }
+      
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+      }
+      
+      /* Loading spinner */
+      .spinner {
+        border: 3px solid #e5e7eb;
+        border-top: 3px solid #E30613;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 0.8s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* Smooth transitions */
+      .transition-smooth {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+      <div class="text-center">
+        <div class="spinner mx-auto mb-4"></div>
+        <p class="text-slate-600 font-medium">Memproses...</p>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+      <div class="max-w-full mx-auto px-4 md:px-12">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-brand-yellow rounded-xl flex items-center justify-center">
+              <i data-lucide="printer" class="w-6 h-6 text-black"></i>
+            </div>
+            <div>
+              <h1 class="text-slate-900 font-bold text-lg">Fast Print Indonesia</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-full mx-auto p-4 md:p-12">
+      <!-- Top Header -->
+      <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Manajemen Produk</h2>
+          <p class="text-slate-500 text-sm mt-1">Kelola semua produk Fast Print Indonesia</p>
+        </div>
+      </header>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-500 text-sm font-medium">Total Produk</p>
+              <p class="text-3xl font-bold text-slate-800 mt-1" id="totalProducts">0</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <i data-lucide="package" class="w-6 h-6 text-brand-blue"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-500 text-sm font-medium">Bisa Dijual</p>
+              <p class="text-3xl font-bold text-emerald-600 mt-1" id="bisaDijual">0</p>
+            </div>
+            <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+              <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-500 text-sm font-medium">Tidak Bisa Dijual</p>
+              <p class="text-3xl font-bold text-rose-600 mt-1" id="tidakBisaDijual">0</p>
+            </div>
+            <div class="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center">
+              <i data-lucide="x-circle" class="w-6 h-6 text-rose-600"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-500 text-sm font-medium">Kategori</p>
+              <p class="text-3xl font-bold text-violet-600 mt-1" id="totalCategories">0</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <i data-lucide="folder" class="w-6 h-6 text-yellow-600"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Section -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 mb-6">
+        <div class="flex flex-col md:flex-row md:items-end gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-slate-700 mb-2">Filter Status</label>
+            <select id="statusFilter" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-smooth">
+              <option value="bisa_dijual" selected>Bisa Dijual</option>
+              <option value="">Semua Status</option>
+              <option value="tidak_bisa_dijual">Tidak Bisa Dijual</option>
+            </select>
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-slate-700 mb-2">Filter Kategori</label>
+            <select id="categoryFilter" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-smooth">
+              <option value="">Semua Kategori</option>
+            </select>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="loadProducts()" class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-smooth">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              <span>Refresh</span>
+            </button>
+            <button id="deleteSelectedBtn" onclick="deleteSelected()" class="hidden items-center gap-2 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-xl transition-smooth">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <span>Hapus (<span id="selectedCount">0</span>)</span>
+            </button>
+            <button onclick="openAddModal()" class="flex items-center gap-2 px-4 py-2.5 bg-brand-yellow hover:bg-[#e6c000] text-black font-medium rounded-xl shadow-sm transition-smooth">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Tambah Produk</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-5 border-b border-slate-100">
+          <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+            <i data-lucide="list" class="w-5 h-5 text-slate-400"></i>
+            Daftar Produk
+          </h2>
+        </div>
+        <div class="p-5">
+          <table id="productsTable" class="w-full">
+            <thead>
+              <tr>
+                <th class="w-10"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"></th>
+                <th>No</th>
+                <th>Nama Produk</th>
+                <th>Kategori</th>
+                <th>Harga</th>
+                <th>Status</th>
+                <th class="w-32">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- Add/Edit Modal -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeModal('productModal')"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div class="bg-brand-yellow px-6 py-4">
+            <h3 class="text-lg font-semibold text-black flex items-center gap-2" id="modalTitle">
+              <i data-lucide="plus-circle" class="w-5 h-5"></i>
+              Tambah Produk
+            </h3>
+          </div>
+          <form id="productForm" class="p-6 space-y-4">
+            <input type="hidden" id="productId" />
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Nama Produk <span class="text-rose-500">*</span>
+              </label>
+              <input type="text" id="namaProduk" required 
+                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-smooth"
+                placeholder="Masukkan nama produk">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Harga <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">Rp</span>
+                <input type="number" id="harga" required min="0" step="0.01"
+                  class="w-full pl-12 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-smooth"
+                  placeholder="0">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Kategori <span class="text-rose-500">*</span>
+              </label>
+              <select id="kategori" required 
+                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-smooth">
+                <option value="">Pilih Kategori</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Status <span class="text-rose-500">*</span>
+              </label>
+              <select id="status" required 
+                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-smooth">
+                <option value="">Pilih Status</option>
+              </select>
+            </div>
+          </form>
+          <div class="px-6 py-4 bg-slate-50 flex justify-end gap-3">
+            <button type="button" onclick="closeModal('productModal')" 
+              class="px-5 py-2.5 border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-100 transition-smooth">
+              Batal
+            </button>
+            <button type="button" onclick="saveProduct()" 
+              class="px-5 py-2.5 bg-brand-yellow hover:bg-[#e6c000] text-black font-medium rounded-xl shadow-lg shadow-yellow-500/25 transition-smooth">
+              Simpan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeModal('deleteModal')"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div class="p-6 text-center">
+            <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="alert-triangle" class="w-8 h-8 text-rose-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-800 mb-2">Konfirmasi Hapus</h3>
+            <p class="text-slate-500 mb-2">Apakah Anda yakin ingin menghapus produk:</p>
+            <p class="font-semibold text-rose-600 text-lg" id="deleteProductName"></p>
+            <p class="text-slate-400 text-sm mt-2">Tindakan ini tidak dapat dibatalkan.</p>
+          </div>
+          <div class="px-6 py-4 bg-slate-50 flex justify-center gap-3">
+            <button type="button" onclick="closeModal('deleteModal')" 
+              class="px-5 py-2.5 border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-100 transition-smooth">
+              Batal
+            </button>
+            <button type="button" id="confirmDeleteBtn"
+              class="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-xl shadow-lg shadow-rose-500/25 transition-smooth">
+              Hapus
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    
+    <script>
+      const API_BASE = "/api";
+      let productsTable;
+      let categories = [];
+      let statuses = [];
+      let allProducts = [];
+
+      // Initialize
+      $(document).ready(function() {
+        lucide.createIcons();
+        initDataTable();
+        loadCategories();
+        loadStatuses();
+        loadProducts();
+
+        $("#statusFilter, #categoryFilter").on("change", applyFilters);
+      });
+
+      function initDataTable() {
+        productsTable = $("#productsTable").DataTable({
+          data: [],
+          columns: [
+            {
+              data: "id_produk",
+              orderable: false,
+              render: function(data) {
+                return `<input type="checkbox" class="product-checkbox w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" value="${data}" onclick="updateSelectedCount()">`;
+              },
+            },
+            { 
+              data: null,
+              render: function(data, type, row, meta) {
+                return `<span class="text-slate-500 font-medium">${meta.row + 1}</span>`;
+              }
+            },
+            { 
+              data: "nama_produk",
+              render: function(data) {
+                return `<span class="font-medium text-slate-800">${data}</span>`;
+              }
+            },
+            { 
+              data: "kategori_nama",
+              render: function(data) {
+                return `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-violet-100 text-violet-700 text-sm font-medium">${data}</span>`;
+              }
+            },
+            {
+              data: "harga",
+              render: function(data) {
+                return `<span class="font-semibold text-emerald-600">Rp ${Number(data).toLocaleString("id-ID")}</span>`;
+              },
+            },
+            {
+              data: "status_nama",
+              render: function(data) {
+                const isActive = data === "bisa dijual";
+                const bgColor = isActive ? "bg-emerald-100" : "bg-rose-100";
+                const textColor = isActive ? "text-emerald-700" : "text-rose-700";
+                const icon = isActive ? "check-circle" : "x-circle";
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${bgColor} ${textColor} text-sm font-medium">
+                  <i data-lucide="${icon}" class="w-3.5 h-3.5"></i>
+                  ${data}
+                </span>`;
+              },
+            },
+            {
+              data: null,
+              orderable: false,
+              render: function(data) {
+                return `
+                  <div class="flex items-center gap-1">
+                    <button onclick="openEditModal(${data.id_produk})" class="p-2 hover:bg-amber-100 rounded-lg transition-smooth group" title="Edit">
+                      <i data-lucide="pencil" class="w-4 h-4 text-slate-400 group-hover:text-amber-600"></i>
+                    </button>
+                    <button onclick="confirmDelete(${data.id_produk}, '${data.nama_produk.replace(/'/g, "\\'")}')" class="p-2 hover:bg-rose-100 rounded-lg transition-smooth group" title="Hapus">
+                      <i data-lucide="trash-2" class="w-4 h-4 text-slate-400 group-hover:text-rose-600"></i>
+                    </button>
+                  </div>
+                `;
+              },
+            },
+          ],
+          language: {
+            search: "Cari:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            paginate: {
+              first: "Pertama",
+              last: "Terakhir",
+              next: "Berikutnya",
+              previous: "Sebelumnya",
+            },
+            emptyTable: "Tidak ada data produk",
+          },
+          pageLength: 30,
+          lengthMenu: [[30, 50, 100, 500], [30, 50, 100, 500]],
+          order: [[2, 'asc']],
+          drawCallback: function() {
+            lucide.createIcons();
+          }
+        });
+      }
+
+      function showLoading() {
+        $("#loadingOverlay").removeClass("hidden");
+      }
+
+      function hideLoading() {
+        $("#loadingOverlay").addClass("hidden");
+      }
+
+      function showToast(message, type = "success") {
+        const bgColor = type === "success" ? "bg-emerald-500" : "bg-rose-500";
+        const icon = type === "success" ? "check-circle" : "alert-circle";
+        const toast = $(`
+          <div class="${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-[slideIn_0.3s_ease]">
+            <i data-lucide="${icon}" class="w-5 h-5"></i>
+            <span class="font-medium">${message}</span>
+            <button onclick="$(this).parent().remove()" class="ml-auto p-1 hover:bg-white/20 rounded-lg">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `);
+        $("#toastContainer").append(toast);
+        lucide.createIcons();
+        setTimeout(() => toast.remove(), 4000);
+      }
+
+      async function loadProducts() {
+        showLoading();
+        try {
+          const response = await fetch(`${API_BASE}/products/`);
+          allProducts = await response.json();
+          applyFilters();
+          updateStats();
+        } catch (error) {
+          showToast("Gagal memuat data produk", "error");
+          console.error(error);
+        }
+        hideLoading();
+      }
+
+      function applyFilters() {
+        let filtered = [...allProducts];
+
+        const statusFilter = $("#statusFilter").val();
+        const categoryFilter = $("#categoryFilter").val();
+
+        if (statusFilter === "bisa_dijual") {
+          filtered = filtered.filter((p) => p.status_nama && p.status_nama.toLowerCase() === "bisa dijual");
+        } else if (statusFilter === "tidak_bisa_dijual") {
+          filtered = filtered.filter((p) => p.status_nama && p.status_nama.toLowerCase() === "tidak bisa dijual");
+        }
+
+        if (categoryFilter) {
+          filtered = filtered.filter((p) => p.kategori == categoryFilter);
+        }
+
+        productsTable.clear().rows.add(filtered).draw();
+        
+        // Luide icons might be needed for the status column
+        lucide.createIcons();
+        
+        $("#selectAll").prop("checked", false);
+        updateSelectedCount();
+      }
+
+      function updateStats() {
+        const total = allProducts.length;
+        const bisaDijual = allProducts.filter((p) => p.status_nama && p.status_nama.toLowerCase() === "bisa dijual").length;
+        const tidakBisaDijual = allProducts.filter((p) => p.status_nama && p.status_nama.toLowerCase() === "tidak bisa dijual").length;
+
+        $("#totalProducts").text(total);
+        $("#bisaDijual").text(bisaDijual);
+        $("#tidakBisaDijual").text(tidakBisaDijual);
+        $("#totalCategories").text(categories.length);
+      }
+
+      async function loadCategories() {
+        try {
+          const response = await fetch(`${API_BASE}/categories/`);
+          categories = await response.json();
+
+          categories.forEach((cat) => {
+            $("#kategori").append(`<option value="${cat.id_kategori}">${cat.nama_kategori}</option>`);
+            $("#categoryFilter").append(`<option value="${cat.id_kategori}">${cat.nama_kategori}</option>`);
+          });
+        } catch (error) {
+          console.error("Failed to load categories:", error);
+        }
+      }
+
+      async function loadStatuses() {
+        try {
+          const response = await fetch(`${API_BASE}/statuses/`);
+          statuses = await response.json();
+
+          statuses.forEach((status) => {
+            $("#status").append(`<option value="${status.id_status}">${status.nama_status}</option>`);
+          });
+        } catch (error) {
+          console.error("Failed to load statuses:", error);
+        }
+      }
+
+      function openModal(id) {
+        $(`#${id}`).removeClass("hidden");
+        document.body.style.overflow = "hidden";
+        lucide.createIcons();
+      }
+
+      function closeModal(id) {
+        $(`#${id}`).addClass("hidden");
+        document.body.style.overflow = "";
+      }
+
+      function openAddModal() {
+        $("#modalTitle").html('<i data-lucide="plus-circle" class="w-5 h-5"></i> Tambah Produk');
+        $("#productForm")[0].reset();
+        $("#productId").val("");
+        openModal("productModal");
+      }
+
+      function openEditModal(id) {
+        const product = allProducts.find((p) => p.id_produk === id);
+        if (!product) return;
+
+        $("#modalTitle").html('<i data-lucide="edit" class="w-5 h-5"></i> Edit Produk');
+        $("#productId").val(product.id_produk);
+        $("#namaProduk").val(product.nama_produk);
+        $("#harga").val(product.harga);
+        $("#kategori").val(product.kategori);
+        $("#status").val(product.status);
+
+        openModal("productModal");
+      }
+
+      async function saveProduct() {
+        const form = document.getElementById("productForm");
+
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        const id = $("#productId").val();
+        const data = {
+          nama_produk: $("#namaProduk").val().trim(),
+          harga: parseFloat($("#harga").val()),
+          kategori: parseInt($("#kategori").val()),
+          status: parseInt($("#status").val()),
+        };
+
+        if (!data.nama_produk) {
+          showToast("Nama produk harus diisi", "error");
+          return;
+        }
+
+        if (isNaN(data.harga) || data.harga < 0) {
+          showToast("Harga harus berupa angka positif", "error");
+          return;
+        }
+
+        showLoading();
+
+        try {
+          const url = id ? `${API_BASE}/products/${id}/` : `${API_BASE}/products/`;
+          const method = id ? "PUT" : "POST";
+
+          const response = await fetch(url, {
+            method: method,
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (response.ok) {
+            showToast(id ? "Produk berhasil diupdate" : "Produk berhasil ditambahkan");
+            closeModal("productModal");
+            loadProducts();
+          } else {
+            const errorData = await response.json();
+            let errorMsg = "Gagal menyimpan produk";
+            
+            if (typeof errorData === 'object') {
+              // Extract first error message if possible
+              const firstKey = Object.keys(errorData)[0];
+              const firstErr = errorData[firstKey];
+              errorMsg = Array.isArray(firstErr) ? `${firstKey}: ${firstErr[0]}` : JSON.stringify(errorData);
+            }
+            
+            showToast(errorMsg, "error");
+            console.error("Save Error:", errorData);
+          }
+        } catch (error) {
+          showToast("Koneksi ke server terputus", "error");
+          console.error("Fetch Error:", error);
+        }
+
+        hideLoading();
+      }
+
+      function confirmDelete(id, name) {
+        $("#deleteProductName").text(name);
+        $("#confirmDeleteBtn").off("click").on("click", () => deleteProduct(id));
+        openModal("deleteModal");
+      }
+
+      async function deleteProduct(id) {
+        showLoading();
+
+        try {
+          const response = await fetch(`${API_BASE}/products/${id}/`, {
+            method: "DELETE",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+          });
+
+          if (response.ok) {
+            showToast("Produk berhasil dihapus");
+            closeModal("deleteModal");
+            loadProducts();
+          } else {
+            showToast("Gagal menghapus produk", "error");
+          }
+        } catch (error) {
+          showToast("Terjadi kesalahan", "error");
+          console.error(error);
+        }
+
+        hideLoading();
+      }
+
+      function toggleSelectAll() {
+        const isChecked = $("#selectAll").prop("checked");
+        $(".product-checkbox").prop("checked", isChecked);
+        updateSelectedCount();
+      }
+
+      function updateSelectedCount() {
+        const count = $(".product-checkbox:checked").length;
+        $("#selectedCount").text(count);
+        if (count > 0) {
+          $("#deleteSelectedBtn").removeClass("hidden").addClass("flex");
+        } else {
+          $("#deleteSelectedBtn").addClass("hidden").removeClass("flex");
+          $("#selectAll").prop("checked", false);
+        }
+      }
+
+      function deleteSelected() {
+        const selectedIds = [];
+        $(".product-checkbox:checked").each(function() {
+          selectedIds.push(parseInt($(this).val()));
+        });
+
+        if (selectedIds.length === 0) {
+          showToast("Pilih produk yang akan dihapus", "error");
+          return;
+        }
+
+        $("#deleteProductName").text(`${selectedIds.length} produk yang dipilih`);
+        $("#confirmDeleteBtn").off("click").on("click", () => executeBulkDelete(selectedIds));
+        openModal("deleteModal");
+      }
+
+      async function executeBulkDelete(selectedIds) {
+        closeModal("deleteModal");
+        showLoading();
+
+        try {
+          const response = await fetch(`${API_BASE}/products/bulk_delete/`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify({ ids: selectedIds }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok && !result.error) {
+            showToast(result.message);
+            $("#selectAll").prop("checked", false);
+            loadProducts();
+          } else {
+            showToast(result.message || "Gagal menghapus", "error");
+          }
+        } catch (error) {
+          showToast("Terjadi kesalahan", "error");
+          console.error(error);
+        }
+
+        hideLoading();
+      }
+
+      async function importFromApi() {
+        if (!confirm("Sync produk dari API Fast Print?\nData baru akan ditambahkan, data existing akan diupdate.")) {
+          return;
+        }
+
+        showLoading();
+
+        try {
+          const response = await fetch(`${API_BASE}/products/import_from_api/`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+          });
+
+          const result = await response.json();
+
+          if (response.ok && !result.error) {
+            showToast(result.message);
+            loadProducts();
+          } else {
+            showToast(result.message || "Import gagal", "error");
+          }
+        } catch (error) {
+          showToast("Terjadi kesalahan saat import", "error");
+          console.error(error);
+        }
+
+        hideLoading();
+      }
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+    </script>
+  </body>
+</html>
